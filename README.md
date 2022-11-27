@@ -45,7 +45,7 @@ type TestValidationStruct struct {
 	Nested    Nested            `json:"nested"`
 }
 v := TestValidationStruct{Complex: &ComplexStruct{}}
-e := porterr.ValidateStruct(&v)
+e := ValidateStruct(&v)
 if e != nil {
    panic(e)
 }
