@@ -33,8 +33,10 @@ var basicValidationRules = map[string]ValidationCallback{
 	"min": IsMinValid,
 	// Check if value or length >= max
 	"max": IsMaxValid,
-	// check for digits. can specify len
+	// Check for digits. can specify len
 	"digit": IsDigits,
+	// Check if nil
+	"notnull": IsNotNullValid,
 }
 
 // Will be used in validation method

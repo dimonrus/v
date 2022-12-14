@@ -364,3 +364,8 @@ func IsDigits(val reflect.Value, args ...string) bool {
 	}
 	return lr == l
 }
+
+// IsNotNullValid Not null validation rule
+func IsNotNullValid(val reflect.Value, args ...string) bool {
+	return val.Kind() == reflect.Ptr && !val.IsNil()
+}

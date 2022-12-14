@@ -24,6 +24,7 @@ Possible rules as parts of 'valid' tag:
 - min. Minimum value or length
 - max. Maximum value or length
 - digit. Only digits in value. Can specify length
+- notnull. Filed must be not null
 
 Example: `valid:"required;exp~[0-5]+;range~1:50;enum~[5,10,15,20,25];digit~4,10;min~3;max~10"`
 ```
@@ -37,7 +38,7 @@ type Nested struct {
 }
 type TestValidationStruct struct {
 	Name      string            `json:"name" valid:"required;exp~[a-z]+"`
-	Number    int               `json:"number" valid:"exp~[0-5]+;range~1:50;enum~[5,10,15,20,25]"`
+	Number    int               `json:"number" valid:"notnull;exp~[0-5]+;range~1:50;enum~[5,10,15,20,25]"`
 	IsTrue    *bool             `json:"isTrue"`
 	Complex   *ComplexStruct    `json:"complex" valid:"required"`
 	Sl        []int64           `json:"sl"`

@@ -755,3 +755,26 @@ func TestIsDigits(t *testing.T) {
 		}
 	})
 }
+
+func TestIsNotNullValid(t *testing.T) {
+	t.Run("is_not_null_ok", func(t *testing.T) {
+		v := new(uint)
+		*v = 11
+		st := struct {
+			Value *uint `valid:"notnull"`
+		}{Value: v}
+		e := ValidateStruct(&st)
+		if e != nil {
+			t.Fatal("is_not_null_ok", e.Error())
+		}
+	})
+	t.Run("is_not_null_nok", func(t *testing.T) {
+		st := struct {
+			Value *uint `valid:"notnull"`
+		}{Value: nil}
+		e := ValidateStruct(&st)
+		if e == nil {
+			t.Fatal("is_not_null_nok")
+		}
+	})
+}
