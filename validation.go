@@ -83,11 +83,26 @@ func ValidateStruct(v interface{}) porterr.IError {
 		switch f.Kind() {
 		case reflect.Struct:
 			e = e.MergeDetails(ValidateStruct(f.Interface()))
+		case reflect.Slice:
+			for j := 0; j < f.Len(); j++ {
+				if f.Index(j).Kind() == reflect.Struct || f.Index(j).Kind() == reflect.Ptr {
+					e = e.MergeDetails(ValidateStruct(f.Index(j).Interface()))
+				}
+			}
 		case reflect.Ptr:
 			if !f.IsNil() {
-				if _, ok := f.Elem().Interface().(fmt.Stringer); f.Elem().Kind() == reflect.Struct && !ok {
-					e = e.MergeDetails(ValidateStruct(f.Interface()))
+				if f.Elem().Kind() == reflect.Slice {
+					for j := 0; j < f.Elem().Len(); j++ {
+						if f.Elem().Index(j).Kind() == reflect.Struct || f.Elem().Index(j).Kind() == reflect.Ptr {
+							e = e.MergeDetails(ValidateStruct(f.Elem().Index(j).Interface()))
+						}
+					}
+				} else if f.Elem().Kind() == reflect.Struct && f.Elem().CanInterface() {
+					if _, ok := f.Elem().Interface().(fmt.Stringer); ok {
+						e = e.MergeDetails(ValidateStruct(f.Interface()))
+					}
 				}
+
 			}
 		}
 		fieldName = t.Tag.Get("json")

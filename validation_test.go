@@ -778,3 +778,44 @@ func TestIsNotNullValid(t *testing.T) {
 		}
 	})
 }
+
+type NestedArray []*NestedItem
+
+type NestedItem struct {
+	Value string `json:"value" valid:"required"`
+}
+
+type SuperStruct struct {
+	Id     int32        `json:"id"`
+	Nested *NestedArray `json:"nested"`
+}
+
+type NestedArray2 []NestedItem2
+
+type NestedItem2 struct {
+	Value string `json:"value" valid:"required"`
+}
+
+type SuperStruct2 struct {
+	Id     int32        `json:"id"`
+	Nested NestedArray2 `json:"nested"`
+}
+
+func TestSuperNestedArray(t *testing.T) {
+	t.Run("slice_checker", func(t *testing.T) {
+		st := &SuperStruct{Nested: &NestedArray{&NestedItem{}}}
+		e := ValidateStruct(st)
+		if e == nil {
+			t.Fatal("must be an error")
+		}
+		t.Log(e.PopDetail().Origin().Name)
+	})
+	t.Run("slice_checker2", func(t *testing.T) {
+		st := &SuperStruct2{Nested: NestedArray2{NestedItem2{}}}
+		e := ValidateStruct(st)
+		if e == nil {
+			t.Fatal("must be an error")
+		}
+		t.Log(e.PopDetail().Origin().Name)
+	})
+}
