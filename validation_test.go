@@ -514,6 +514,26 @@ func BenchmarkWrapStruct(b *testing.B) {
 }
 
 func TestIsMinValid(t *testing.T) {
+	t.Run("min_with_pointer", func(t *testing.T) {
+		var something *string
+		minErr := struct {
+			Max *string `valid:"min~30"`
+		}{Max: something}
+		e := ValidateStruct(&minErr)
+		if e != nil {
+			t.Fatal("min error unexpected")
+		}
+	})
+	t.Run("required_min_with_pointer", func(t *testing.T) {
+		var something *string
+		minErr := struct {
+			Max *string `valid:"required;min~30"`
+		}{Max: something}
+		e := ValidateStruct(&minErr)
+		if e == nil {
+			t.Fatal("min error expected")
+		}
+	})
 	t.Run("min_error_expected", func(t *testing.T) {
 		minErr := struct {
 			Min string `valid:"min~5"`
@@ -591,6 +611,26 @@ func TestIsMinValid(t *testing.T) {
 }
 
 func TestIsMaxValid(t *testing.T) {
+	t.Run("max_with_pointer", func(t *testing.T) {
+		var something *string
+		maxErr := struct {
+			Max *string `valid:"max~30"`
+		}{Max: something}
+		e := ValidateStruct(&maxErr)
+		if e != nil {
+			t.Fatal("max error unexpected")
+		}
+	})
+	t.Run("required_max_with_pointer", func(t *testing.T) {
+		var something *string
+		maxErr := struct {
+			Max *string `valid:"required;max~30"`
+		}{Max: something}
+		e := ValidateStruct(&maxErr)
+		if e == nil {
+			t.Fatal("max error expected")
+		}
+	})
 	t.Run("max_error_expected", func(t *testing.T) {
 		maxErr := struct {
 			Max string `valid:"max~4"`

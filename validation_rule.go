@@ -213,12 +213,9 @@ func IsMinValid(val reflect.Value, args ...string) bool {
 	}
 	if val.Kind() == reflect.Ptr {
 		if val.IsNil() {
-			return false
+			return true
 		}
 		val = val.Elem()
-	}
-	if len(args) == 0 {
-		return true
 	}
 	min, err := strconv.Atoi(args[0])
 	if err != nil {
@@ -262,12 +259,9 @@ func IsMaxValid(val reflect.Value, args ...string) bool {
 	}
 	if val.Kind() == reflect.Ptr {
 		if val.IsNil() {
-			return false
+			return true
 		}
 		val = val.Elem()
-	}
-	if len(args) == 0 {
-		return true
 	}
 	max, err := strconv.Atoi(args[0])
 	if err != nil {
