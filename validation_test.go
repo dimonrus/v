@@ -859,3 +859,27 @@ func TestSuperNestedArray(t *testing.T) {
 		t.Log(e.PopDetail().Origin().Name)
 	})
 }
+
+type TopLevelData struct {
+	Id     int            `json:"id" valid:"required"`
+	Name   string         `json:"name" valid:"required"`
+	Nested []TopLevelData `json:"nested" valid:"-"`
+}
+
+func TestIgnoreValidation(t *testing.T) {
+	nested := TopLevelData{}
+	item := TopLevelData{Id: 1, Name: "first", Nested: []TopLevelData{nested}}
+	e := ValidateStruct(&item)
+	if e != nil {
+		t.Fatal(e)
+	}
+}
+
+func BenchmarkNestedLevel(b *testing.B) {
+	nested := TopLevelData{}
+	item := TopLevelData{Id: 1, Name: "first", Nested: []TopLevelData{nested}}
+	for i := 0; i < b.N; i++ {
+		_ = ValidateStruct(&item)
+	}
+	b.ReportAllocs()
+}

@@ -3,7 +3,6 @@ package v
 import (
 	"fmt"
 	"github.com/dimonrus/porterr"
-	"net/http"
 	"reflect"
 )
 
@@ -57,7 +56,7 @@ func PrepareActualValidationRules(customValidationRules map[string]ValidationCal
 
 // ValidateStruct struct fields validation
 func ValidateStruct(v interface{}) porterr.IError {
-	e := porterr.New(porterr.PortErrorValidation, "Validation error").HTTP(http.StatusBadRequest)
+	var e porterr.IError
 	ve := reflect.ValueOf(v)
 	te := reflect.TypeOf(v)
 
@@ -67,6 +66,9 @@ func ValidateStruct(v interface{}) porterr.IError {
 	}
 
 	if ve.Kind() != reflect.Struct {
+		if e == nil {
+			e = porterr.HttpValidationError()
+		}
 		e = e.PushDetail(porterr.PortErrorParam, "type", "Type struct required. Type "+ve.Kind().String()+" received")
 		return e
 	}
@@ -80,12 +82,22 @@ func ValidateStruct(v interface{}) porterr.IError {
 	for i := 0; i < ve.NumField(); i++ {
 		f = ve.Field(i)
 		t = te.Field(i)
+		validTag := t.Tag.Get("valid")
+		if validTag == "-" {
+			continue
+		}
 		switch f.Kind() {
 		case reflect.Struct:
+			if e == nil {
+				e = porterr.HttpValidationError()
+			}
 			e = e.MergeDetails(ValidateStruct(f.Interface()))
 		case reflect.Slice:
 			for j := 0; j < f.Len(); j++ {
 				if f.Index(j).Kind() == reflect.Struct || f.Index(j).Kind() == reflect.Ptr {
+					if e == nil {
+						e = porterr.HttpValidationError()
+					}
 					e = e.MergeDetails(ValidateStruct(f.Index(j).Interface()))
 				}
 			}
@@ -94,29 +106,40 @@ func ValidateStruct(v interface{}) porterr.IError {
 				if f.Elem().Kind() == reflect.Slice {
 					for j := 0; j < f.Elem().Len(); j++ {
 						if f.Elem().Index(j).Kind() == reflect.Struct || f.Elem().Index(j).Kind() == reflect.Ptr {
+							if e == nil {
+								e = porterr.HttpValidationError()
+							}
 							e = e.MergeDetails(ValidateStruct(f.Elem().Index(j).Interface()))
 						}
 					}
 				} else if f.Elem().Kind() == reflect.Struct && f.Elem().CanInterface() {
 					if _, ok := f.Elem().Interface().(fmt.Stringer); ok {
+						if e == nil {
+							e = porterr.HttpValidationError()
+						}
 						e = e.MergeDetails(ValidateStruct(f.Interface()))
 					}
 				}
-
 			}
 		}
 		fieldName = t.Tag.Get("json")
 		if fieldName == "" {
 			fieldName = t.Name
 		}
-		rules = ParseValidTag(t.Tag.Get("valid"))
+		rules = ParseValidTag(validTag)
 		for _, rule := range rules {
 			if vRule, ok := actualValidationRules[rule.Name]; ok {
 				if !vRule(f, rule.Args...) {
+					if e == nil {
+						e = porterr.HttpValidationError()
+					}
 					e = e.PushDetail(porterr.PortErrorParam, fieldName, "Invalid validation for "+rule.Name+" rule")
 				}
 			}
 		}
+	}
+	if e == nil {
+		return nil
 	}
 	return e.IfDetails()
 }
