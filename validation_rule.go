@@ -26,7 +26,7 @@ func IsRegularValid(val reflect.Value, args ...string) bool {
 	}
 	if val.Kind() == reflect.Ptr {
 		if val.IsNil() {
-			return false
+			return true
 		}
 		val = val.Elem()
 	}
