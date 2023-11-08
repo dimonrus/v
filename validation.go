@@ -146,7 +146,7 @@ func ValidateStruct(v interface{}) porterr.IError {
 
 // ParseValidTag parse validation tag for rule and arguments
 // Example
-// valid:"exp~[0-5]+;range~1-50;enum~5,10,15,20,25"`
+// valid:"rx~[0-5]+;range~1-50;enum~5,10,15,20,25"`
 func ParseValidTag(validTag string) []ValidationRule {
 	if validTag == "" {
 		return nil

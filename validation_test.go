@@ -18,8 +18,8 @@ type Nested struct {
 }
 
 type TestValidationStruct struct {
-	Name      string            `json:"name" valid:"required;exp~[a-z]+"`
-	Number    int               `json:"number" valid:"exp~[0-5]+;range~1:50;enum~[5,10,15,20,25]"`
+	Name      string            `json:"name" valid:"required;rx~[a-z]+"`
+	Number    int               `json:"number" valid:"rx~[0-5]+;range~1:50;enum~[5,10,15,20,25]"`
 	IsTrue    *bool             `json:"isTrue"`
 	Complex   *ComplexStruct    `json:"complex" valid:"required"`
 	Sl        []int64           `json:"sl"`
@@ -346,16 +346,16 @@ func BenchmarkCheckNative(b *testing.B) {
 }
 
 func TestParseValidTag(t *testing.T) {
-	rules := ParseValidTag("exp~[0-5]+;range~1:50;enum~5,10,15,20,25")
+	rules := ParseValidTag("rx~[0-5]+;range~1:50;enum~5,10,15,20,25")
 	t.Log(rules)
 }
 
 func BenchmarkParseValidTag(b *testing.B) {
-	rules := ParseValidTag("exp~[0-5]+;range~1:50;enum~5,10,15,20,25;other~cool;cool~231231")
+	rules := ParseValidTag("rx~[0-5]+;range~1:50;enum~5,10,15,20,25;other~cool;cool~231231")
 	b.Log(rules)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		ParseValidTag("exp~[0-5]+;range~1:50;enum~5,10,15,20,25")
+		ParseValidTag("rx~[0-5]+;range~1:50;enum~5,10,15,20,25")
 	}
 	b.ReportAllocs()
 }
