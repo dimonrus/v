@@ -25,10 +25,12 @@ type TestValidationStruct struct {
 	Sl        []int64           `json:"sl"`
 	SuperName AliasOnTypeString `json:"superName" valid:"required"`
 	Nested    Nested            `json:"nested"`
+	Columns   []Nested          `json:"columns" valid:"required"`
 }
 
 func TestValidateStructPointer(t *testing.T) {
-	v := TestValidationStruct{Complex: &ComplexStruct{}}
+	tr := true
+	v := TestValidationStruct{Complex: &ComplexStruct{}, Columns: []Nested{{Bar: &tr}}}
 	e := ValidateStruct(&v)
 	if e != nil {
 		for _, iError := range e.GetDetails() {

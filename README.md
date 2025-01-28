@@ -27,6 +27,10 @@ Possible rules as parts of 'valid' tag:
 - notnull. Filed must be not null
 
 Example: `valid:"required;rx~[0-5]+;range~1:50;enum~5,10,15,20,25;digit~4,10;min~3;max~10"`
+
+You can ignore field for validation specify valid tag as "-"
+Example: `valid:"-"`
+
 ```
 type ComplexStruct struct {
 	Cool bool

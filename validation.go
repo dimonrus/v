@@ -1,13 +1,15 @@
 package v
 
 import (
-	"fmt"
 	"github.com/dimonrus/porterr"
 	"reflect"
 )
 
 // ValidationCallback function that performs validation rule
 type ValidationCallback func(val reflect.Value, args ...string) bool
+
+// ValidationRules list of validation rules
+type ValidationRules []ValidationRule
 
 // ValidationRule validation params
 type ValidationRule struct {
@@ -74,7 +76,7 @@ func ValidateStruct(v interface{}) porterr.IError {
 	}
 
 	var fieldName string
-	var rules []ValidationRule
+	var rules ValidationRules
 
 	var f reflect.Value
 	var t reflect.StructField
@@ -113,12 +115,10 @@ func ValidateStruct(v interface{}) porterr.IError {
 						}
 					}
 				} else if f.Elem().Kind() == reflect.Struct && f.Elem().CanInterface() {
-					if _, ok := f.Elem().Interface().(fmt.Stringer); ok {
-						if e == nil {
-							e = porterr.HttpValidationError()
-						}
-						e = e.MergeDetails(ValidateStruct(f.Interface()))
+					if e == nil {
+						e = porterr.HttpValidationError()
 					}
+					e = e.MergeDetails(ValidateStruct(f.Interface()))
 				}
 			}
 		}
@@ -133,7 +133,7 @@ func ValidateStruct(v interface{}) porterr.IError {
 					if e == nil {
 						e = porterr.HttpValidationError()
 					}
-					e = e.PushDetail(porterr.PortErrorParam, fieldName, "Invalid validation for "+rule.Name+" rule")
+					e = e.PushDetail(porterr.PortErrorParam, fieldName, "Invalid validation for "+rule.Name+" rule on field: "+fieldName)
 				}
 			}
 		}
@@ -147,11 +147,11 @@ func ValidateStruct(v interface{}) porterr.IError {
 // ParseValidTag parse validation tag for rule and arguments
 // Example
 // valid:"rx~[0-5]+;range~1-50;enum~5,10,15,20,25"`
-func ParseValidTag(validTag string) []ValidationRule {
+func ParseValidTag(validTag string) ValidationRules {
 	if validTag == "" {
 		return nil
 	}
-	var result = make([]ValidationRule, 4)
+	var result = make(ValidationRules, 4)
 	var ruleCount int
 	var indexStart, i int
 
@@ -163,7 +163,7 @@ func ParseValidTag(validTag string) []ValidationRule {
 		}
 		if validTag[i] == '~' {
 			if ruleCount == len(result) {
-				result = append(result, make([]ValidationRule, 4)...)
+				result = append(result, make(ValidationRules, 4)...)
 			}
 			result[ruleCount].Name = validTag[indexStart:i]
 			i++
