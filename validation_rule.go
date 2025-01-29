@@ -58,6 +58,26 @@ func IsEnumValid(val reflect.Value, args ...string) bool {
 		return true
 	}
 	switch val.Kind() {
+	case reflect.Slice:
+		for i := 0; i < val.Len(); i++ {
+			if !IsEnumValid(val.Index(i), args...) {
+				return false
+			}
+		}
+	case reflect.Struct:
+	//	return ValidateStruct(val.Interface()) == nil
+	//case reflect.Ptr:
+	//	if !val.IsNil() {
+	//		if val.Elem().Kind() == reflect.Slice {
+	//			for j := 0; j < val.Elem().Len(); j++ {
+	//				if val.Elem().Index(j).Kind() == reflect.Struct || val.Elem().Index(j).Kind() == reflect.Ptr {
+	//					return ValidateStruct(val.Elem().Index(j).Interface()) == nil
+	//				}
+	//			}
+	//		} else if val.Elem().Kind() == reflect.Struct && val.Elem().CanInterface() {
+	//			return ValidateStruct(val.Interface()) == nil
+	//		}
+	//	}
 	case reflect.String:
 		v := val.String()
 		for _, value := range values {

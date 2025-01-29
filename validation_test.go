@@ -300,6 +300,23 @@ func TestIsEnumValid(t *testing.T) {
 	}
 }
 
+type TestEnumList struct {
+	EnumStrings []string `json:"foo" valid:"required;enum~empty,base,value"`
+}
+
+func TestIsEnumDifferentTypes(t *testing.T) {
+	s := TestEnumList{EnumStrings: []string{"aaaaa", "bbbb"}}
+	e := ValidateStruct(s)
+	if e != nil {
+		for _, iError := range e.GetDetails() {
+			er := iError.Origin()
+			t.Log(er.Name, er.Message)
+		}
+	} else {
+		t.Fatal("must be an error")
+	}
+}
+
 func TestIsEmptyEnumValid(t *testing.T) {
 	s := TestEnumStruct{}
 	e := ValidateStruct(s)
