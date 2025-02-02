@@ -300,20 +300,35 @@ func TestIsEnumValid(t *testing.T) {
 	}
 }
 
+type NestedEnum struct {
+	Bar string `json:"bar" valid:"required;enum~empty,base,value"`
+}
+
+type NestedEnums []NestedEnum
+
 type TestEnumList struct {
-	EnumStrings []string `json:"foo" valid:"required;enum~empty,base,value"`
+	Foo         string        `json:"foo" valid:"required;enum~empty,base,value"`
+	EnumStrings []string      `json:"enumString" valid:"required;enum~empty,base,value"`
+	Enums       []NestedEnum  `json:"enums"`
+	EnumsPtr    []*NestedEnum `json:"enumsPtr"`
+	List        *NestedEnums  `json:"list"`
 }
 
 func TestIsEnumDifferentTypes(t *testing.T) {
-	s := TestEnumList{EnumStrings: []string{"aaaaa", "bbbb"}}
+	s := TestEnumList{
+		Foo:         "empty",
+		EnumStrings: []string{"base", "value"},
+		Enums:       []NestedEnum{{Bar: "empty"}, {Bar: "base"}},
+		EnumsPtr:    []*NestedEnum{{Bar: "value"}, {Bar: "value"}},
+		List:        &NestedEnums{{Bar: "value"}},
+	}
 	e := ValidateStruct(s)
 	if e != nil {
 		for _, iError := range e.GetDetails() {
 			er := iError.Origin()
 			t.Log(er.Name, er.Message)
 		}
-	} else {
-		t.Fatal("must be an error")
+		t.Fatal(e.Error())
 	}
 }
 
@@ -325,6 +340,40 @@ func TestIsEmptyEnumValid(t *testing.T) {
 			er := iError.Origin()
 			t.Fatal(er.Name, er.Message)
 		}
+	}
+}
+
+type DigitRangeItem struct {
+	Digit []string `json:"digit" valid:"required;digit~4,7;"`
+	Range []int    `json:"range" valid:"required;range~1:50;"`
+}
+
+type DigitRangeItemList []DigitRangeItem
+
+type DigitRange struct {
+	Items DigitRangeItemList
+}
+
+func TestDigitRange(t *testing.T) {
+	data := DigitRange{
+		Items: DigitRangeItemList{
+			{
+				Digit: []string{"1234", "1234567"},
+				Range: []int{1, 43, 50},
+			},
+			{
+				Digit: []string{"1234", "1234567"},
+				Range: []int{1},
+			},
+		},
+	}
+	e := ValidateStruct(&data)
+	if e != nil {
+		for _, iError := range e.GetDetails() {
+			er := iError.Origin()
+			t.Fatal(er.Name, er.Message)
+		}
+		t.Fatal(e)
 	}
 }
 
