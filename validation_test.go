@@ -794,6 +794,15 @@ func TestIsDigits(t *testing.T) {
 			t.Fatal("digits_string_nok")
 		}
 	})
+	t.Run("must be error", func(t *testing.T) {
+		st := struct {
+			Value string `valid:"digit~4"`
+		}{Value: "azxs"}
+		e := ValidateStruct(&st)
+		if e == nil {
+			t.Fatal("digits_string_nok")
+		}
+	})
 	t.Run("digits_string_ok_len", func(t *testing.T) {
 		st := struct {
 			Value string `valid:"digit~5,10"`
@@ -822,7 +831,7 @@ func TestIsDigits(t *testing.T) {
 			Value string `valid:"digit~5,10"`
 		}{Value: "1234v"}
 		e = ValidateStruct(&st)
-		if e != nil {
+		if e == nil {
 			t.Fatal("digits_string_nok_len")
 		}
 	})

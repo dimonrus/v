@@ -380,7 +380,7 @@ func IsDigits(val reflect.Value, args ...string) bool {
 		}
 		for _, length := range lengths {
 			ll, _ := strconv.Atoi(length)
-			if ll == lr {
+			if ll == l {
 				return true
 			}
 		}
